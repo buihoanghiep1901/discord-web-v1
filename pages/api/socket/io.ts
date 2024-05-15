@@ -1,6 +1,7 @@
 import { Server as NetServer } from "http";
 import { NextApiRequest } from "next";
 import { Server as ServerIO } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 
 import { NextApiResponseServerIo } from "@/types";
 
@@ -18,6 +19,10 @@ const ioHandler = (req: NextApiRequest, res: NextApiResponseServerIo) => {
       path: path,
       // @ts-ignore
       addTrailingSlash: false,
+    });
+    instrument(io, {
+      auth: false,
+      mode: "development",
     });
     res.socket.server.io = io;
   }
