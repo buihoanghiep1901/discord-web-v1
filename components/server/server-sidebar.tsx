@@ -44,17 +44,11 @@ export const ServerSidebar = async ({
     },
     include: {
       channels: {
-        orderBy: {
-          createdAt: "asc",
-        },
+        orderBy: {createdAt: "asc"},
       },
       members: {
-        include: {
-          profile: true,
-        },
-        orderBy: {
-          role: "asc",
-        }
+        include: {profile: true},
+        orderBy: {role: "asc"}
       }
     }
   });
