@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
   const at = new AccessToken(apiKey, apiSecret, { identity: username });
 
   at.addGrant({ room, roomJoin: true, canPublish: true, canSubscribe: true });
-
-  return NextResponse.json({ token: at.toJwt() });
+  const token = await at.toJwt();
+  console.log('access token', token);
+  return NextResponse.json({ token: token });
 }
