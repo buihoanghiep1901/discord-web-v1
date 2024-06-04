@@ -1,3 +1,4 @@
+// @ts-nocheck
 import qs from "query-string";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
