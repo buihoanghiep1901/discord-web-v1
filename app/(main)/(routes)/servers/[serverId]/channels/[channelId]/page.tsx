@@ -31,6 +31,14 @@ const ChannelIdPage = async ({
     },
   });
 
+  const result = await db.channel.findFirst({
+    where: {
+      name: 'general',
+      serverId: params.serverId,
+    },
+  });
+  const channelId= result?.id;
+
   const member = await db.member.findFirst({
     where: {
       serverId: params.serverId,
@@ -76,18 +84,13 @@ const ChannelIdPage = async ({
           />
         </>
       )}
-      {channel.type === ChannelType.AUDIO && (
-        <MediaRoom
-          chatId={channel.id}
-          video={false}
-          audio={true}
-        />
-      )}
       {channel.type === ChannelType.VIDEO && (
         <MediaRoom
           chatId={channel.id}
           video={true}
           audio={true}
+          serverId={params.serverId}
+          channelId={channelId}
         />
       )}
     </div>

@@ -3,23 +3,29 @@
 import { useEffect, useState } from "react";
 import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { Channel } from "@prisma/client";
 import { useUser } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
+import { useRouter }  from "next/navigation";
+import { db } from "@/lib/db";
 
 interface MediaRoomProps {
   chatId: string;
+  serverId?: string;
+  channelId?: string;
   video: boolean;
   audio: boolean;
 };
 
 export const MediaRoom = ({
   chatId,
+  serverId,
+  channelId,
   video,
   audio
 }: MediaRoomProps) => {
   const { user } = useUser();
   const [token, setToken] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     if (!user?.firstName || !user?.lastName) return;
@@ -58,6 +64,7 @@ export const MediaRoom = ({
       connect={true}
       video={video}
       audio={audio}
+      onDisconnected={()=>(router.push(`/servers/${serverId}/channels/${channelId}`))}
     >
       <VideoConference />
     </LiveKitRoom>
