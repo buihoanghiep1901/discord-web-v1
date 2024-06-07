@@ -149,13 +149,15 @@ export const CreateChannelModal = () => {
                       </FormControl>
                       <SelectContent>
                         {Object.values(ChannelType).map((type) => (
-                          <SelectItem
-                            key={type}
-                            value={type}
-                            className="capitalize"
-                          >
-                            {type.toLowerCase()}
-                          </SelectItem>
+                          type != 'AUDIO' &&(
+                            <SelectItem
+                              key={type}
+                              value={type}
+                              className="capitalize"
+                            >
+                              {type.toLowerCase()}
+                            </SelectItem>
+                          )
                         ))}
                       </SelectContent>
                     </Select>
