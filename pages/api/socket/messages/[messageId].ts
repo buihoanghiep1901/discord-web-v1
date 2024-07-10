@@ -85,7 +85,7 @@ export default async function handler(
 
     const isMessageOwner = message.memberId === member.id;
     const isAdmin = member.role === MemberRole.ADMIN;
-    const isModerator = member.role === MemberRole.MODERATOR;
+    const isModerator = member.role === MemberRole.MODERATOR && (message.member.role !== MemberRole.ADMIN) && (message.member.role !== MemberRole.MODERATOR);
     const canModify = isMessageOwner || isAdmin || isModerator;
 
     if (!canModify) {

@@ -2,7 +2,7 @@
 
 import { Fragment, useRef, ElementRef } from "react";
 import { format } from "date-fns";
-import { Member, Message, Profile } from "@prisma/client";
+import { Member, MemberRole, Message, Profile } from "@prisma/client";
 import { Loader2, ServerCrash } from "lucide-react";
 
 import { useChatQuery } from "@/hooks/use-chat-query";
@@ -113,6 +113,7 @@ export const ChatMessages = ({
                   key={message.id}
                   id={message.id}
                   currentMember={member}
+                  belongToAdminOrMod={message.member.role == MemberRole.ADMIN || message.member.role == MemberRole.MODERATOR}
                   member={message.member}
                   content={message.content}
                   fileUrl={message.fileUrl}

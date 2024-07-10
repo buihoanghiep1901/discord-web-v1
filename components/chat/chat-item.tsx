@@ -33,6 +33,7 @@ interface ChatItemProps {
   timestamp: string;
   fileUrl: string | null;
   deleted: boolean;
+  belongToAdminOrMod?: boolean;
   currentMember: Member;
   isUpdated: boolean;
   socketUrl: string;
@@ -49,7 +50,7 @@ const formSchema = z.object({
   content: z.string().min(1),
 });
 
-export const ChatItem = ({
+export const ChatItem =  ({
   id,
   content,
   member,
@@ -59,7 +60,8 @@ export const ChatItem = ({
   currentMember,
   isUpdated,
   socketUrl,
-  socketQuery
+  socketQuery,
+  belongToAdminOrMod
 }: ChatItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { onOpen } = useModal();
@@ -118,11 +120,12 @@ export const ChatItem = ({
   }, [content]);
 
   const fileType = fileUrl?.split(".").pop();
-
+  
+    
   const isAdmin = currentMember.role === MemberRole.ADMIN;
   const isModerator = currentMember.role === MemberRole.MODERATOR;
   const isOwner = currentMember.id === member.id;
-  const canDeleteMessage = !deleted && (isAdmin || isModerator || isOwner);
+  const canDeleteMessage = !deleted && (isAdmin || (isModerator && !belongToAdminOrMod) || isOwner);
   const canEditMessage = !deleted && isOwner && !fileUrl;
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
