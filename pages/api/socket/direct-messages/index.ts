@@ -35,39 +35,17 @@ export default async function handler(
         id: conversationId as string,
         OR: [
           {
-            memberOne: {
-              profileId: profile.id,
-            }
+            profileOneId: profile.id
           },
           {
-            memberTwo: {
-              profileId: profile.id,
-            }
+            profileTwoId: profile.id
           }
         ]
       },
-      include: {
-        memberOne: {
-          include: {
-            profile: true,
-          }
-        },
-        memberTwo: {
-          include: {
-            profile: true,
-          }
-        }
-      }
     })
 
     if (!conversation) {
       return res.status(404).json({ message: "Conversation not found" });
-    }
-
-    const member = conversation.memberOne.profileId === profile.id ? conversation.memberOne : conversation.memberTwo
-
-    if (!member) {
-      return res.status(404).json({ message: "Member not found" });
     }
 
     const message = await db.directMessage.create({
@@ -75,20 +53,16 @@ export default async function handler(
         content,
         fileUrl,
         conversationId: conversationId as string,
-        memberId: member.id,
+        profileId: profile.id,
       },
       include: {
-        member: {
-          include: {
-            profile: true,
-          }
-        }
+        profile: true
       }
     });
 
-    const channelKey = `chat:${conversationId}:messages`;
+    const conversationKey = `chat:${conversationId}:direct-messages`;
 
-    res?.socket?.server?.io?.emit(channelKey, message);
+    res?.socket?.server?.io?.emit(conversationKey, message);
 
     return res.status(200).json(message);
   } catch (error) {

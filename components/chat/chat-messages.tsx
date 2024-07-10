@@ -2,7 +2,7 @@
 
 import { Fragment, useRef, ElementRef } from "react";
 import { format } from "date-fns";
-import { Member, MemberRole, Message, Profile } from "@prisma/client";
+import { DirectMessage, Member, MemberRole, Message, Profile } from "@prisma/client";
 import { Loader2, ServerCrash } from "lucide-react";
 
 import { useChatQuery } from "@/hooks/use-chat-query";
@@ -20,9 +20,15 @@ type MessageWithMemberWithProfile = Message & {
   }
 }
 
+type DirectMessageWithProfile = DirectMessage & {
+  profile: Profile
+}
+
+
 interface ChatMessagesProps {
   name: string;
-  member: Member;
+  member?: Member;
+  profile?: Profile;
   chatId: string;
   apiUrl: string;
   socketUrl: string;
@@ -35,6 +41,7 @@ interface ChatMessagesProps {
 export const ChatMessages = ({
   name,
   member,
+  profile,
   chatId,
   apiUrl,
   socketUrl,
@@ -44,8 +51,8 @@ export const ChatMessages = ({
   type,
 }: ChatMessagesProps) => {
   const queryKey = `chat:${chatId}`;
-  const addKey = `chat:${chatId}:messages`;
-  const updateKey = `chat:${chatId}:messages:update` 
+  const addKey = type == "channel" ? `chat:${chatId}:messages` : `chat:${chatId}:direct-messages` ;
+  const updateKey = type == "channel" ?  `chat:${chatId}:messages:update`  :  `chat:${chatId}:direct-messages:update`
 
   const chatRef = useRef<ElementRef<"div">>(null);
   const bottomRef = useRef<ElementRef<"div">>(null);
@@ -105,28 +112,56 @@ export const ChatMessages = ({
             )}
           </div>
         )}
-        <div className="flex flex-col-reverse mt-auto">
-          {data?.pages?.map((group, i) => (
-            <Fragment key={i}>
-              {group.items.map((message: MessageWithMemberWithProfile) => (
-                <ChatItem
-                  key={message.id}
-                  id={message.id}
-                  currentMember={member}
-                  belongToAdminOrMod={message.member.role == MemberRole.ADMIN || message.member.role == MemberRole.MODERATOR}
-                  member={message.member}
-                  content={message.content}
-                  fileUrl={message.fileUrl}
-                  deleted={message.deleted}
-                  timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
-                  isUpdated={message.updatedAt !== message.createdAt}
-                  socketUrl={socketUrl}
-                  socketQuery={socketQuery}
-                />
-              ))}
-            </Fragment>
-          ))}
-        </div>
+        {type == 'channel' && (
+          <div className="flex flex-col-reverse mt-auto">
+            {data?.pages?.map((group, i) => (
+              <Fragment key={i}>
+                {group.items.map((message: MessageWithMemberWithProfile) => (
+                  <ChatItem
+                    type="channel"
+                    key={message.id}
+                    id={message.id}
+                    currentMember={member}
+                    belongToAdminOrMod={message.member.role == MemberRole.ADMIN || message.member.role == MemberRole.MODERATOR}
+                    member={message.member}
+                    content={message.content}
+                    fileUrl={message.fileUrl}
+                    deleted={message.deleted}
+                    timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
+                    isUpdated={message.updatedAt !== message.createdAt}
+                    socketUrl={socketUrl}
+                    socketQuery={socketQuery}
+                  />
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        )}
+
+        {type == 'conversation' && (
+          <div className="flex flex-col-reverse mt-auto">
+            {data?.pages?.map((group, i) => (
+              <Fragment key={i}>
+                {group.items.map((message: DirectMessageWithProfile) => (
+                  <ChatItem
+                    type="conversation"
+                    key={message.id}
+                    id={message.id}
+                    currentProfile={profile}
+                    profile={message.profile}
+                    content={message.content}
+                    fileUrl={message.fileUrl}
+                    deleted={message.deleted}
+                    timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
+                    isUpdated={message.updatedAt !== message.createdAt}
+                    socketUrl={socketUrl}
+                    socketQuery={socketQuery}
+                  />
+                ))}
+              </Fragment>
+            ))}
+          </div>
+        )}
         <div ref={bottomRef} />
       </div>
     )
