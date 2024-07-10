@@ -142,7 +142,7 @@ export const ChatItem =  ({
   }
 
   function checkMod(){
-    if(currentMember && belongToAdminOrMod){
+    if(currentMember && belongToAdminOrMod != undefined){
       return currentMember.role === MemberRole.MODERATOR && !belongToAdminOrMod
     }
   }
