@@ -23,24 +23,22 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
-import { currentProfile } from "@/lib/current-profile";
 
 interface ChatItemProps {
   id: string;
   content: string;
-  member?: Member & {
-    profile: Profile;
-  };
-  profile?: Profile;
   timestamp: string;
   fileUrl: string | null;
   deleted: boolean;
-  belongToAdminOrMod?: boolean;
-  currentMember?: Member;
-  currentProfile?: Profile;
   isUpdated: boolean;
   socketUrl: string;
   socketQuery: Record<string, string>;
+  type: "channel" | "conversation"
+  member?: Member & { profile: Profile; };
+  currentMember?: Member;
+  belongToAdminOrMod?: boolean;
+  profile?: Profile;
+  currentProfile?: Profile;
 };
 
 const roleIconMap = {
@@ -56,17 +54,18 @@ const formSchema = z.object({
 export const ChatItem =  ({
   id,
   content,
-  member,
-  profile,
   timestamp,
   fileUrl,
   deleted,
-  currentMember,
-  currentProfile,
   isUpdated,
   socketUrl,
   socketQuery,
-  belongToAdminOrMod
+  member,
+  currentMember,
+  profile,
+  currentProfile,
+  belongToAdminOrMod,
+  type
 }: ChatItemProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const { onOpen } = useModal();
@@ -135,7 +134,7 @@ export const ChatItem =  ({
   function checkOwner(){
     if(currentMember && member){
 
-      return currentMember.id === member?.id
+      return currentMember.id === member.id
     }else if(currentProfile && profile){
       
       return currentProfile.id == profile.id
@@ -143,15 +142,15 @@ export const ChatItem =  ({
   }
 
   function checkMod(){
-    if(currentMember){
-      return currentMember.role === MemberRole.MODERATOR
+    if(currentMember && belongToAdminOrMod){
+      return currentMember.role === MemberRole.MODERATOR && !belongToAdminOrMod
     }
   }
     
   const isAdmin = checkAdmin() ;
   const isModerator = checkMod();
   const isOwner = checkOwner();
-  const canDeleteMessage = !deleted && (isAdmin || (isModerator && !belongToAdminOrMod) || isOwner);
+  const canDeleteMessage = !deleted && (isAdmin || isModerator || isOwner);
   const canEditMessage = !deleted && isOwner && !fileUrl;
   const isPDF = fileType === "pdf" && fileUrl;
   const isImage = !isPDF && fileUrl;
@@ -170,9 +169,6 @@ export const ChatItem =  ({
                 <p  className="font-semibold text-sm hover:underline cursor-pointer">
                   {profile.name}
                 </p>
-                {/* <ActionTooltip label={memb.role}>
-                  {roleIconMap[member?.role]}
-                </ActionTooltip> */}
               </div>
               <span className="text-xs text-zinc-500 dark:text-zinc-400">
                 {timestamp}

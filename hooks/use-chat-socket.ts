@@ -16,6 +16,10 @@ type MessageWithMemberWithProfile = Message & {
   }
 }
 
+type DirectMessageWithProfile = Message & {
+  profile: Profile;
+}
+
 export const useChatSocket = ({
   addKey,
   updateKey,
@@ -29,13 +33,25 @@ export const useChatSocket = ({
       return;
     }
 
-    socket.on(updateKey, (message: MessageWithMemberWithProfile) => {
+    socket.on(updateKey, ( message: MessageWithMemberWithProfile | DirectMessageWithProfile )=> {
       queryClient.setQueryData([queryKey], (oldData: any) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return oldData;
         }
 
         const newData = oldData.pages.map((page: any) => {
+          if(updateKey.includes('direct')){
+            return {
+              ...page,
+              items: page.items.map((item: DirectMessageWithProfile) => {
+                if (item.id === message.id) {
+                  return message;
+                }
+                return item;
+              })
+            }
+          }
+
           return {
             ...page,
             items: page.items.map((item: MessageWithMemberWithProfile) => {
@@ -54,7 +70,7 @@ export const useChatSocket = ({
       })
     });
 
-    socket.on(addKey, (message: MessageWithMemberWithProfile) => {
+    socket.on(addKey, (message: MessageWithMemberWithProfile | DirectMessageWithProfile) => {
       queryClient.setQueryData([queryKey], (oldData: any) => {
         if (!oldData || !oldData.pages || oldData.pages.length === 0) {
           return {
