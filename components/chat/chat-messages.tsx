@@ -22,7 +22,8 @@ type MessageWithMemberWithProfile = Message & {
 
 interface ChatMessagesProps {
   name: string;
-  member: Member;
+  member?: Member;
+  profile?: Profile;
   chatId: string;
   apiUrl: string;
   socketUrl: string;
@@ -35,6 +36,7 @@ interface ChatMessagesProps {
 export const ChatMessages = ({
   name,
   member,
+  profile,
   chatId,
   apiUrl,
   socketUrl,

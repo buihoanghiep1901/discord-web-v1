@@ -9,9 +9,9 @@ import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MediaRoom } from "@/components/media-room";
 
-interface MemberIdPageProps {
+interface ProfileIdPageProps {
   params: {
-    memberId: string;
+    profileId: string;
     serverId: string;
   },
   searchParams: {
@@ -19,45 +19,33 @@ interface MemberIdPageProps {
   }
 }
 
-const MemberIdPage = async ({
+const ProfileIdPage = async ({
   params,
   searchParams,
-}: MemberIdPageProps) => {
-  const profile = await currentProfile();
+}: ProfileIdPageProps) => {
+  const currProfile = await currentProfile();
 
-  if (!profile) {
+  if (!currProfile) {
     return auth().redirectToSignIn();
   }
 
-  const currentMember = await db.member.findFirst({
-    where: {
-      serverId: params.serverId,
-      profileId: profile.id,
-    },
-    include: {
-      profile: true,
-    },
-  });
 
-  if (!currentMember) {
-    return redirect("/");
-  }
-
-  const conversation = await getOrCreateConversation(currentMember.id, params.memberId);
+  const conversation = await getOrCreateConversation(currProfile.id, params.profileId);
+  console.log('convo: ',conversation)
 
   if (!conversation) {
     return redirect(`/servers/${params.serverId}`);
   }
 
-  const { memberOne, memberTwo } = conversation;
+  const { profileOne, profileTwo } = conversation;
 
-  const otherMember = memberOne.profileId === profile.id ? memberTwo : memberOne;
+  const otherProfile = profileOne.id === currProfile.id ? profileTwo : profileOne;
 
   return ( 
     <div className="bg-white dark:bg-[#313338] flex flex-col h-full">
       <ChatHeader
-        imageUrl={otherMember.profile.imageUrl}
-        name={otherMember.profile.name}
+        imageUrl={otherProfile.imageUrl}
+        name={otherProfile.name}
         serverId={params.serverId}
         type="conversation"
       />
@@ -71,8 +59,8 @@ const MemberIdPage = async ({
       {!searchParams.video && (
         <>
           <ChatMessages
-            member={currentMember}
-            name={otherMember.profile.name}
+            profile={currProfile}
+            name={otherProfile.name}
             chatId={conversation.id}
             type="conversation"
             apiUrl="/api/direct-messages"
@@ -84,7 +72,7 @@ const MemberIdPage = async ({
             }}
           />
           <ChatInput
-            name={otherMember.profile.name}
+            name={otherProfile.name}
             type="conversation"
             apiUrl="/api/socket/direct-messages"
             query={{
@@ -97,4 +85,4 @@ const MemberIdPage = async ({
    );
 }
  
-export default MemberIdPage;
+export default ProfileIdPage;

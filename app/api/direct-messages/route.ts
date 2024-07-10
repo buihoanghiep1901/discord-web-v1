@@ -37,11 +37,7 @@ export async function GET(
           conversationId,
         },
         include: {
-          member: {
-            include: {
-              profile: true,
-            }
-          }
+          profile: true
         },
         orderBy: {
           createdAt: "desc",
@@ -54,11 +50,7 @@ export async function GET(
           conversationId,
         },
         include: {
-          member: {
-            include: {
-              profile: true,
-            }
-          }
+          profile: true
         },
         orderBy: {
           createdAt: "desc",
